@@ -266,27 +266,56 @@ Reparto de roles del grupo:
 | 2 | Web + escritorio | Pasos 3 y 4 en su PC, apuntando a la IP del integrante 1 |
 | 3 | Móvil | Paso 5 en su celular real, apuntando a la IP del integrante 1 |
 
-IIS Express **solo acepta conexiones desde la misma PC**. Para que los demás se conecten, el integrante 1 publica el servidor en **IIS**. Todos deben estar en **la misma red WiFi**.
+IIS Express **solo acepta conexiones desde la misma PC**. Si otro equipo lo llama por IP, responde *400 Solicitud incorrecta*. Para que los demás se conecten, el integrante 1 publica el servidor en **IIS**. Todos deben estar en **la misma red WiFi**.
 
-1. **Activar IIS y WCF** (como administrador). En *Activar o desactivar las características de Windows* marca:
-   - **Internet Information Services** → Servicios World Wide Web → Características de desarrollo de aplicaciones → **ASP.NET 4.8**.
-   - **.NET Framework 4.8 Advanced Services** → Servicios WCF → **Activación HTTP**.
-2. **Publicar el servidor.** En Visual Studio (como administrador), haz clic derecho en el proyecto del servidor → **Publicar** → **Carpeta** → por ejemplo `C:\inetpub\conuni` → **Publicar**.
-3. **Crear el sitio.** En el **Administrador de IIS** → Sitios → **Agregar sitio web**:
-   - Nombre `CONUNI`
-   - Ruta física `C:\inetpub\conuni`
-   - Puerto **8085**
-   - Grupo de aplicaciones con **.NET CLR v4.0**
-4. **Abrir el firewall** (PowerShell como administrador):
+### 6.1 Publicar en IIS con el script (integrante 1)
+
+El script [`04. SERVIDOR/publicar_iis.ps1`](04.%20SERVIDOR/publicar_iis.ps1) hace todo de una vez:
+- activa ASP.NET 4.8 y **WCF → Activación HTTP**;
+- copia el servidor a `C:\inetpub\conuni`;
+- crea el sitio **CONUNI** en el puerto **8085**;
+- abre el puerto en el **firewall**, en cualquier tipo de red;
+- prueba el WSDL y muestra la URL que deben usar los demás.
+
+1. Compila el servidor en Visual Studio con **Compilar → Compilar solución**.
+2. **Cierra IIS Express:** cierra el Visual Studio del servidor. Si sigue el ícono de IIS Express junto al reloj, haz clic derecho sobre él y elige **Salir**.
+3. Clic derecho en **Inicio** → **Terminal (Administrador)** → responde **Sí**.
+4. Ejecuta:
    ```powershell
-   New-NetFirewallRule -DisplayName "CONUNI SOAP 8085" -Direction Inbound -Protocol TCP -LocalPort 8085 -Action Allow
+   powershell -ExecutionPolicy Bypass -File "RUTA\DEL\PROYECTO\04. SERVIDOR\publicar_iis.ps1"
    ```
-5. **Averiguar la IP.** Ejecuta `ipconfig` y busca *Dirección IPv4* en el adaptador WiFi, por ejemplo `192.168.1.10`.
-6. **Comprobar desde otra máquina o desde el celular:** abre `http://192.168.1.10:8085/WSConversion.svc` en el navegador.
-7. **Apuntar cada cliente a esa IP:**
-   - Consola y escritorio: en `App.config`, cambia `address="http://192.168.1.10:8085/WSConversion.svc"`.
-   - Web: en `appsettings.json`, cambia `"Url": "http://192.168.1.10:8085/WSConversion.svc"`.
-   - Móvil: en el cuadro **Servidor SOAP** de la app.
+5. Al final debe mostrar `WSDL OK (HTTP 200)` y la URL del adaptador **Wi-Fi**, por ejemplo:
+   ```
+   Wi-Fi        http://192.168.0.106:8085/WSConversion.svc
+   ```
+
+Desde ese momento el servidor queda encendido en IIS, aunque cierres Visual Studio o reinicies la PC. Si cambias el código del servidor, compílalo y vuelve a ejecutar el script.
+
+> La IP depende de la red. Si cambias de WiFi (por ejemplo, el día del examen en la ESPE), vuelve a ejecutar el script o usa `ipconfig` para ver la nueva *Dirección IPv4* del adaptador Wi-Fi.
+
+### 6.2 Comprobar la red
+
+En el **navegador** de cada equipo (otra PC, celular o tablet) abre `http://IP-DEL-SERVIDOR:8085/WSConversion.svc`. Debe aparecer **"Servicio de WSConversion"**. Si no aparece, ningún cliente va a conectar: revisa que todos estén en la misma WiFi y que el script haya terminado sin errores.
+
+### 6.3 Apuntar cada cliente a la IP del servidor
+
+| Cliente | Dónde se cambia | Valor |
+|---|---|---|
+| Consola | `App.config` → `address=` | `http://IP-DEL-SERVIDOR:8085/WSConversion.svc` |
+| Escritorio | `App.config` → `address=` (abajo de la ventana se ve "Conectado a: …") | igual |
+| Web | `appsettings.json` → `"ServicioSoap": { "Url": … }` | igual |
+| Móvil | Cuadro **Servidor SOAP** del login de la app (sin cable) | igual |
+
+En la PC del servidor, la consola puede quedarse con `localhost`.
+
+### 6.4 Prueba final con los 3 integrantes a la vez
+
+| Equipo | Cliente | Conversión | Resultado |
+|---|---|---|---|
+| PC 1 | Consola | 100 °C → °F | 212 °F |
+| PC 2 | Escritorio | 1 m → ft | 3,28084 ft |
+| PC 2 | Web | 10 km → mi | 6,213712 mi |
+| Celular | Móvil | 1 kg → lb | 2,204623 lb |
 
 ---
 
