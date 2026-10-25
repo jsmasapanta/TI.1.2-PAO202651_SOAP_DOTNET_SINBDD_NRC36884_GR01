@@ -35,8 +35,18 @@ public class ClienteConversion : IDisposable
 
     public string UrlServidor { get; }
 
-    public Task<bool> LoginAsync(string usuario, string clave) =>
-        InvocarAsync(canal => canal.LoginAsync(usuario, clave));
+    /// <summary>
+    /// El servidor responde true o un SOAP Fault con su mensaje. Si respondiera false (un servidor anterior,
+    /// sin el control de intentos), no se deja entrar.
+    /// </summary>
+    public async Task<bool> LoginAsync(string usuario, string clave)
+    {
+        if (!await InvocarAsync(canal => canal.LoginAsync(usuario, clave)))
+        {
+            throw new ErrorServicioException("Usuario o clave incorrectos.");
+        }
+        return true;
+    }
 
     /// <summary>Llama a la operación SOAP que se llama igual que <paramref name="operacion"/>.</summary>
     public Task<double> ConvertirAsync(string operacion, double valor) =>

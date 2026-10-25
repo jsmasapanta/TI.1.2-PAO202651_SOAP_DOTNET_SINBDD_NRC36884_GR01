@@ -35,7 +35,18 @@ namespace ec.edu.monster.servicio
 
         public string UrlServidor => _fabrica.Endpoint.Address.Uri.ToString();
 
-        public bool Login(string usuario, string clave) => Invocar(c => c.Login(usuario, clave));
+        /// <summary>
+        /// El servidor responde true o un SOAP Fault con su mensaje. Si respondiera false (un servidor anterior,
+        /// sin el control de intentos), no se deja entrar.
+        /// </summary>
+        public bool Login(string usuario, string clave)
+        {
+            if (!Invocar(c => c.Login(usuario, clave)))
+            {
+                throw new ErrorServicioException("Usuario o clave incorrectos.");
+            }
+            return true;
+        }
 
         /// <summary>Llama a la operación SOAP que se llama igual que <paramref name="operacion"/>.</summary>
         public double Convertir(string operacion, double valor) => Invocar(c => Llamar(c, operacion, valor));

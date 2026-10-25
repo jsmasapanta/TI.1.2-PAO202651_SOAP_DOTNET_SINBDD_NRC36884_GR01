@@ -50,7 +50,13 @@ public sealed class ClienteSoap
     public async Task<bool> LoginAsync(string usuario, string clave)
     {
         string respuesta = await InvocarAsync("login", ("usuario", usuario), ("clave", clave));
-        return bool.Parse(respuesta);
+        // El servidor responde true o un SOAP Fault con su mensaje. Si respondiera false (un servidor anterior,
+        // sin el control de intentos), no se deja entrar.
+        if (!bool.Parse(respuesta))
+        {
+            throw new ErrorServicioException("Usuario o clave incorrectos.");
+        }
+        return true;
     }
 
     public async Task<double> ConvertirAsync(string operacion, double valor)
