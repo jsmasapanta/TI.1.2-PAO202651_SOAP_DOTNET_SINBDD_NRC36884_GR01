@@ -1,9 +1,7 @@
 using System;
-using ConversorUnidades.Consola.Controlador;
-using ConversorUnidades.Consola.Servicio;
-using ConversorUnidades.Consola.Vista;
+using ec.edu.monster.vista;
 
-namespace ConversorUnidades.Consola
+namespace ec.edu.monster
 {
     internal static class Program
     {
@@ -12,8 +10,7 @@ namespace ConversorUnidades.Consola
             var vista = new VistaConsola();
             try
             {
-                var controlador = new ControladorConsola(vista, ClienteConversion.Instancia);
-                controlador.Iniciar();
+                vista.Iniciar();
             }
             catch (Exception ex)
             {

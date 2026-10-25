@@ -12,6 +12,10 @@ namespace ConversorUnidades.Servidor.Contratos
     {
         // ---------- Autenticación ----------
 
+        /// <summary>
+        /// Devuelve true si las credenciales son correctas. Si no, responde un Fault REGLA_NEGOCIO con los
+        /// intentos restantes; al tercer intento fallido el usuario queda bloqueado 2 minutos.
+        /// </summary>
         [OperationContract(Name = "login")]
         [FaultContract(typeof(ErrorServicio))]
         bool Login(string usuario, string clave);

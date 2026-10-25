@@ -53,6 +53,12 @@ namespace ConversorUnidades.Servidor.Servicios
                 throw new FaultException<ErrorServicio>(
                     new ErrorServicio("VALOR_INVALIDO", mensaje), new FaultReason(mensaje));
             }
+            catch (ReglaNegocioException ex)
+            {
+                // Usuario o clave incorrectos (con intentos restantes) o usuario bloqueado.
+                throw new FaultException<ErrorServicio>(
+                    new ErrorServicio("REGLA_NEGOCIO", ex.Message), new FaultReason(ex.Message));
+            }
             catch (InvalidOperationException ex)
             {
                 throw new FaultException<ErrorServicio>(

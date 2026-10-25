@@ -49,7 +49,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
+  </ItemGroup>
+  <ItemGroup>
     <Content Include="WSConversion.svc" />
+    <Content Include="WSConversion.asmx" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
@@ -60,10 +64,15 @@
     <Compile Include="Logica\ConvertidorLongitud.cs" />
     <Compile Include="Logica\ConvertidorMasa.cs" />
     <Compile Include="Logica\ConvertidorTemperatura.cs" />
+    <Compile Include="Logica\ReglaNegocioException.cs" />
     <Compile Include="Logica\Validacion.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Servicios\WSConversion.svc.cs">
       <DependentUpon>WSConversion.svc</DependentUpon>
+    </Compile>
+    <Compile Include="Servicios\WSConversionAsmx.asmx.cs">
+      <DependentUpon>WSConversion.asmx</DependentUpon>
+      <SubType>Component</SubType>
     </Compile>
   </ItemGroup>
   <PropertyGroup>
