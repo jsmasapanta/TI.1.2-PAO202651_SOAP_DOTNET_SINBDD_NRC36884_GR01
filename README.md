@@ -7,8 +7,9 @@ No usa base de datos: las conversiones se calculan con fórmulas y factores exac
 | | |
 |---|---|
 | **Usuario** | `monster` |
-| **Clave** | `monster` |
-| **Servidor SOAP** | `http://localhost:8085/WSConversion.svc` (WSDL: `?wsdl`) |
+| **Clave** | `monster69` |
+| **Servidor SOAP** | `http://localhost:8085/WSConversion.svc` (WSDL: `?wsdl`) · en red: `http://192.168.100.3:8085/WSConversion.svc` |
+| **Página ASMX** | `http://localhost:8085/WSConversion.asmx` (las mismas operaciones, con formulario de prueba) |
 | **Cliente web** | `http://localhost:5085` |
 | **IDE** | Visual Studio 2022 Community |
 | **Patrones** | MVC en los clientes · Singleton en servidor y clientes |
@@ -96,10 +97,15 @@ Cada carpeta `04. …` tiene su propio `LEEME.md` con más detalle.
 
 | Cliente | Modelo | Vista | Controlador | Servicio (acceso SOAP) |
 |---|---|---|---|---|
-| CLICON | `Modelo/Conversion.cs`, `CatalogoConversiones.cs` | `Vista/VistaConsola.cs` | `Controlador/ControladorConsola.cs` | `Servicio/ClienteConversion.cs` |
-| CLIESC | `Modelo/CatalogoConversiones.cs` | `Vista/FormLogin`, `FormPrincipal`, `PanelConversion` | `Controlador/ControladorConversion.cs` | `Servicio/ClienteConversion.cs` |
-| CLIWEB | `Modelo/Catalogo.cs`, `ViewModels.cs` | `Views/Cuenta`, `Views/Conversion` (.cshtml) | `Controllers/CuentaController`, `ConversionController` | `Servicio/ClienteConversion.cs` |
-| CLIMOV | `Modelo/Catalogo.cs` | `Vista/LoginPage.xaml`, `PrincipalPage.xaml` | `Controlador/ControladorConversion.cs` | `Servicio/ClienteSoap.cs` |
+| CLICON | `modelo/Conversion.cs`, `ErrorServicio.cs` | `vista/VistaConsola.cs`, `CatalogoConversiones.cs` | `controlador/ControladorConsola.cs` | `servicio/ClienteConversion.cs`, `IWSConversion.cs` |
+| CLIESC | `modelo/Conversion.cs`, `ErrorServicio.cs` | `vista/FormLogin`, `FormPrincipal`, `PanelConversion`, `CatalogoConversiones`, `Formato` | `controlador/ControladorConversion.cs` | `servicio/ClienteConversion.cs`, `IWSConversion.cs` |
+| CLIWEB | `modelo/Conversion.cs`, `ErrorServicio.cs`, `ViewModels.cs` | `vista/Cuenta`, `vista/Conversion` (.cshtml), `CatalogoConversiones`, `Formato` | `controlador/CuentaController`, `ConversionController` | `servicio/ClienteConversion.cs`, `IWSConversion.cs` |
+| CLIMOV | `modelo/Conversion.cs` | `vista/LoginPage.xaml`, `PrincipalPage.xaml`, `CatalogoConversiones`, `Formato` | `controlador/ControladorConversion.cs` | `servicio/ClienteSoap.cs` |
+
+Todo va dentro de `ec/edu/monster/` (namespaces `ec.edu.monster.modelo`, `.vista`, `.controlador`, `.servicio`). En la web, `Program.cs` configura `RazorViewEngineOptions` para buscar las vistas en `ec/edu/monster/vista`.
+
+**Estructura como el GR05:** en los clientes, `modelo/` tiene solo get/set (`Conversion`, `Categoria`, `ErrorServicio`), `servicio/` llama al servicio (`IWSConversion` + `ClienteConversion` Singleton; en el móvil `ClienteSoap` con HttpClient), `controlador/` solo pasa las llamadas y `vista/` tiene las pantallas, el catálogo de opciones del menú y el formato. **Todo lo demás está en el servidor:** el login con **3 intentos** (al tercero el usuario queda bloqueado 2 minutos) y las validaciones (cero absoluto, valores negativos). El cliente solo convierte el texto a número y muestra el mensaje del SOAP Fault.
+
 
 El **servidor** está organizado en capas: `Contratos` (interfaz del servicio), `Servicios` (implementación) y `Logica` (cálculos, validación y autenticación).
 
@@ -109,11 +115,11 @@ Una sola instancia compartida por toda la aplicación. El constructor es privado
 
 | Dónde | Clase | Cómo se usa |
 |---|---|---|
-| Servidor | `Logica/Autenticador.cs` | `Autenticador.Instancia.Validar(usuario, clave)`; lee `Web.config` una sola vez |
-| CLICON | `Servicio/ClienteConversion.cs` | `ClienteConversion.Instancia` (una sola `ChannelFactory`) |
-| CLIESC | `Servicio/ClienteConversion.cs` | `ClienteConversion.Instancia` |
-| CLIWEB | `Servicio/ClienteConversion.cs` | `builder.Services.AddSingleton<ClienteConversion>()` en `Program.cs` (Singleton del contenedor de dependencias) |
-| CLIMOV | `Servicio/ClienteSoap.cs` y `Controlador/ControladorConversion.cs` | `ClienteSoap.Instancia`, `ControladorConversion.Instancia` |
+| Servidor | `Logica/Autenticador.cs` | `Autenticador.Instancia.Validar(usuario, clave)`; lee `Web.config` una sola vez y guarda los intentos fallidos de cada usuario |
+| CLICON | `servicio/ClienteConversion.cs` | `ClienteConversion.Instancia` (una sola `ChannelFactory`) |
+| CLIESC | `servicio/ClienteConversion.cs` | `ClienteConversion.Instancia` |
+| CLIWEB | `servicio/ClienteConversion.cs` | `builder.Services.AddSingleton<ClienteConversion>()` en `Program.cs` (Singleton del contenedor de dependencias) |
+| CLIMOV | `servicio/ClienteSoap.cs` y `controlador/ControladorConversion.cs` | `ClienteSoap.Instancia`, `ControladorConversion.Instancia` |
 
 ```csharp
 public sealed class ClienteConversion
@@ -158,7 +164,7 @@ public sealed class ClienteConversion
 ```xml
 <appSettings>
   <add key="UsuarioServicio" value="monster" />
-  <add key="ClaveServicio" value="monster" />
+  <add key="ClaveServicio" value="monster69" />
 </appSettings>
 ...
 <serviceHostingEnvironment ... minFreeMemoryPercentageToActivateService="0" />
@@ -170,19 +176,19 @@ public sealed class ClienteConversion
 1. Con el servidor encendido, abre **otra ventana** de Visual Studio.
 2. Abre `04. CLICON\CONUNI_SOAP_DOTNET_CLICON\CONUNI_SOAP_DOTNET_CLICON.sln`.
 3. Ve a **Depurar → Iniciar sin depurar**.
-4. En la ventana negra escribe Usuario `monster` y Clave `monster`. La clave se muestra con `*`.
+4. En la ventana negra escribe Usuario `monster` y Clave `monster69`. La clave se muestra con `*`. Si se equivoca, sale el mensaje del servidor con los intentos restantes.
 5. Navega con los números del menú: **[1] Temperatura, [2] Longitud, [3] Masa → conversión → valor**. Con **[0]** vuelves o cierras sesión.
 
 La URL del servidor está en `App.config`:
 ```xml
-<endpoint address="http://localhost:8085/WSConversion.svc" ... name="WSConversion" />
+<endpoint address="http://192.168.100.3:8085/WSConversion.svc" ... name="WSConversion" />
 ```
 
 ## Paso 3 — Cliente escritorio (`04. CLIESC`)
 
 1. En otra ventana de Visual Studio, abre `04. CLIESC\CONUNI_SOAP_DOTNET_CLIESC\CONUNI_SOAP_DOTNET_CLIESC.sln`.
 2. Ve a **Depurar → Iniciar sin depurar**.
-3. Ingresa con `monster` / `monster`.
+3. Ingresa con `monster` / `monster69`. A la izquierda se ve la imagen de Monsters Inc.
 4. En el menú verde de la izquierda elige **Temperatura**, **Longitud** o **Masa**.
 5. Elige las unidades **De** y **A**, escribe el valor y presiona **CONVERTIR** (o Enter).
 6. Con el botón **⇄** intercambias las unidades. A la derecha está el **Historial de la sesión**.
@@ -195,16 +201,16 @@ La URL del servidor está en `App.config`:
 3. Ve a **Depurar → Iniciar sin depurar**. La primera vez descarga los paquetes NuGet de WCF.
 4. Si pregunta por un **certificado SSL de desarrollo**, responde **No**: el proyecto usa HTTP.
 5. Se abre una **ventana negra** (servidor Kestrel), que no debes cerrar, y el navegador en `http://localhost:5085`.
-6. Ingresa con `monster` / `monster` y convierte.
+6. Ingresa con `monster` / `monster69` y convierte. La imagen aparece en el login y en el menú lateral.
 7. La página es *responsive*: también se ve bien en un celular.
 
 La URL del servidor SOAP está en `appsettings.json`:
 ```json
-"ServicioSoap": { "Url": "http://localhost:8085/WSConversion.svc" }
+"ServicioSoap": { "Url": "http://192.168.100.3:8085/WSConversion.svc" }
 ```
 
 Seguridad incluida:
-- Sesión con 3 intentos de login.
+- Login contra el servidor (los 3 intentos y el bloqueo los cuenta el servidor).
 - Filtro `[RequiereSesion]`: sin sesión te devuelve al login.
 - `ValidateAntiForgeryToken` en los formularios.
 
@@ -323,9 +329,9 @@ En la PC del servidor, la consola puede quedarse con `localhost`.
 
 | # | Caso | Entrada | Resultado esperado |
 |---|---|---|---|
-| 1 | Login correcto | monster / monster | Acceso al sistema |
-| 2 | Login incorrecto | monster / otra | "Usuario o clave incorrectos" |
-| 3 | 3 intentos fallidos | clave mala ×3 | Se bloquea / cierra |
+| 1 | Login correcto | monster / monster69 | Acceso al sistema |
+| 2 | Login incorrecto | monster / otra | "Usuario o clave incorrectos. Intentos restantes: 2." (mensaje del servidor) |
+| 3 | 3 intentos fallidos | clave mala ×3 | "Se superaron los 3 intentos. El usuario queda bloqueado 2 minutos." (aunque luego se escriba la clave correcta) |
 | 4 | Celsius → Fahrenheit | 100 | 212 °F |
 | 5 | Celsius → Kelvin | 25 | 298,15 K |
 | 6 | Bajo el cero absoluto | −300 °C | SOAP Fault: *no puede ser menor al cero absoluto* |

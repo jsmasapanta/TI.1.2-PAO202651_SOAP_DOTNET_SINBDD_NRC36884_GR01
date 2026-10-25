@@ -1,8 +1,8 @@
-using ConversorUnidades.Movil.Controlador;
-using ConversorUnidades.Movil.Modelo;
-using ConversorUnidades.Movil.Servicio;
+using ec.edu.monster.controlador;
+using ec.edu.monster.modelo;
+using ec.edu.monster.servicio;
 
-namespace ConversorUnidades.Movil.Vista;
+namespace ec.edu.monster.vista;
 
 /// <summary>Pantalla principal: conversiones por categoría (CU02–CU05), historial (CU06) y cierre de sesión (CU07).</summary>
 public partial class PrincipalPage : ContentPage
@@ -42,7 +42,7 @@ public partial class PrincipalPage : ContentPage
             boton.BackgroundColor = activo ? ColoresCategoria[cat] : Colors.White;
             boton.TextColor = activo ? Colors.White : ColoresCategoria[cat];
         }
-        LblTitulo.Text = $"{categoria}  ·  {Catalogo.Simbolo(categoria)}";
+        LblTitulo.Text = $"{categoria}  ·  {Formato.Simbolo(categoria)}";
         LblTitulo.TextColor = color;
         BtnConvertir.BackgroundColor = color;
         BtnIntercambiar.BackgroundColor = color;
@@ -50,7 +50,7 @@ public partial class PrincipalPage : ContentPage
         Cargando.Color = color;
         LblResultado.TextColor = color;
 
-        PkrOrigen.ItemsSource = Catalogo.UnidadesOrigen(categoria);
+        PkrOrigen.ItemsSource = CatalogoConversiones.UnidadesOrigen(categoria);
         PkrOrigen.SelectedIndex = 0;
         LimpiarResultado();
         MostrarHistorial();
@@ -59,7 +59,7 @@ public partial class PrincipalPage : ContentPage
     private void OnOrigenCambiado(object? sender, EventArgs e)
     {
         if (PkrOrigen.SelectedItem is not Unidad origen) return;
-        PkrDestino.ItemsSource = Catalogo.UnidadesDestino(_categoria, origen);
+        PkrDestino.ItemsSource = CatalogoConversiones.UnidadesDestino(_categoria, origen);
         PkrDestino.SelectedIndex = 0;
     }
 
@@ -76,10 +76,10 @@ public partial class PrincipalPage : ContentPage
     private async void OnConvertirClicked(object? sender, EventArgs e)
     {
         if (PkrOrigen.SelectedItem is not Unidad origen || PkrDestino.SelectedItem is not Unidad destino) return;
-        Conversion? conversion = Catalogo.Buscar(origen, destino);
+        Conversion? conversion = CatalogoConversiones.Buscar(origen, destino);
         if (conversion == null) return;
 
-        double? valor = ControladorConversion.LeerNumero(TxtValor.Text);
+        double? valor = Formato.LeerNumero(TxtValor.Text);
         if (valor == null)
         {
             MostrarError("Ingrese un número válido (puede usar coma o punto).");
@@ -89,15 +89,19 @@ public partial class PrincipalPage : ContentPage
         Ocupado(true);
         try
         {
-            ResultadoConversion r = await _controlador.ConvertirAsync(conversion, valor.Value);
+            double resultado = await _controlador.ConvertirAsync(conversion, valor.Value);
+            string entrada = $"{Formato.Numero(valor.Value)} {conversion.Origen.Simbolo}";
+            string salida = $"{Formato.Numero(resultado)} {conversion.Destino.Simbolo}";
             LblResultado.TextColor = ColoresCategoria[_categoria];
-            LblResultado.Text = r.Resultado;
+            LblResultado.Text = salida;
             LblDetalle.TextColor = Color.FromArgb("#6C757D");
-            LblDetalle.Text = r.Detalle;
+            LblDetalle.Text = $"{entrada} ({conversion.Origen.Nombre})  =  {salida} ({conversion.Destino.Nombre})";
+            _controlador.AnotarHistorial(_categoria, $"{DateTime.Now:HH:mm:ss}  ·  {entrada} → {salida}");
             MostrarHistorial();
         }
-        catch (ErrorConversionException ex)
+        catch (ErrorServicioException ex)
         {
+            // Por ejemplo: «La temperatura no puede ser menor al cero absoluto…» (lo valida el servidor).
             MostrarError(ex.Message);
         }
         finally

@@ -8,12 +8,15 @@ Aplicación Android en C# que consume el servicio SOAP `WSConversion`. Se abre y
 CONUNI_SOAP_DOTNET_CLIMOV.sln
 Directory.Build.props        (obj en ruta corta: Android falla con rutas > 260 caracteres)
 CONUNI_SOAP_DOTNET_CLIMOV/
-├── Modelo/Catalogo.cs                    Categoria, Unidad, Conversion y las 16 conversiones
-├── Servicio/ClienteSoap.cs               SOAP 1.1 con HttpClient · SINGLETON (ClienteSoap.Instancia)
-├── Controlador/ControladorConversion.cs  login, conversión, formato, historial · SINGLETON
-├── Vista/LoginPage.xaml                  CU01 login (3 intentos) + CU08 URL del servidor
-├── Vista/PrincipalPage.xaml              CU02–CU07: categorías, De/A, intercambiar, historial, salir
-└── Platforms/Android/AndroidManifest.xml permiso INTERNET + usesCleartextTraffic (HTTP sin TLS)
+├── ec/edu/monster/modelo/Conversion.cs              Categoria, Unidad, Conversion (solo get/set)
+├── ec/edu/monster/servicio/ClienteSoap.cs           SOAP 1.1 con HttpClient · SINGLETON (ClienteSoap.Instancia)
+├── ec/edu/monster/controlador/ControladorConversion.cs  solo pasa las llamadas, sesión e historial · SINGLETON
+├── ec/edu/monster/vista/LoginPage.xaml              CU01 login (mensaje del servidor) + CU08 URL + imagen
+├── ec/edu/monster/vista/PrincipalPage.xaml          CU02–CU07: categorías, De/A, historial, imagen, salir
+├── ec/edu/monster/vista/CatalogoConversiones.cs     opciones de las listas
+├── ec/edu/monster/vista/Formato.cs                  número y símbolo
+├── Resources/Images/monster.jpg
+└── Platforms/Android/AndroidManifest.xml            permiso INTERNET + usesCleartextTraffic (HTTP sin TLS)
 ```
 
 ## Cómo funciona la llamada SOAP
@@ -29,6 +32,6 @@ CONUNI_SOAP_DOTNET_CLIMOV/
 3. Visual Studio: abrir `CONUNI_SOAP_DOTNET_CLIMOV.sln`, elegir el celular en la lista de dispositivos y **Depurar → Iniciar sin depurar**.
 4. En la app, campo **Servidor SOAP**:
    - Por USB (prueba rápida, con `adb reverse tcp:8085 tcp:8085`): `http://localhost:8085/WSConversion.svc`
-   - Por WiFi (servidor publicado en IIS): `http://IP-DE-LA-PC:8085/WSConversion.svc`
+   - Por WiFi (servidor publicado en IIS): `http://192.168.100.3:8085/WSConversion.svc` (valor por defecto)
    - Emulador: `http://10.0.2.2:8085/WSConversion.svc`
-5. Usuario `monster`, clave `monster`.
+5. Usuario `monster`, clave `monster69`. Los 3 intentos los controla el servidor.

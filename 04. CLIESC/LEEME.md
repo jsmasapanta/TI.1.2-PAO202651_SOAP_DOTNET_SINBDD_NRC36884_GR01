@@ -6,28 +6,31 @@ Aplicación Windows Forms en .NET Framework 4.7.2 que consume el servicio SOAP `
 
 ```
 CONUNI_SOAP_DOTNET_CLIESC/
-├── Modelo/
-│   ├── Conversion.cs              igual que en CLICON
-│   └── CatalogoConversiones.cs    + Unidad, UnidadesOrigen(), UnidadesDestino(), Buscar()
-├── Servicio/
-│   ├── IWSConversion.cs           copia del contrato del servidor
-│   └── ClienteConversion.cs       ChannelFactory + mensajes de error claros
-├── Controlador/
-│   └── ControladorConversion.cs   llamadas asíncronas (la ventana no se congela), lectura y formato de números
-├── Vista/
-│   ├── Tema.cs                    colores y estilos compartidos
-│   ├── FormLogin.cs               inicio de sesión (3 intentos, mostrar clave)
-│   ├── FormPrincipal.cs           menú lateral + barra de estado con la URL del servidor
-│   └── PanelConversion.cs         pantalla reutilizable para cada categoría
-├── Program.cs                     ciclo login → principal → cerrar sesión → login
-└── App.config                     URL del servidor
+├── ec/edu/monster/
+│   ├── modelo/
+│   │   ├── Conversion.cs              Categoria + Conversion (solo get/set)
+│   │   └── ErrorServicio.cs           detalle del SOAP Fault (solo get/set)
+│   ├── servicio/
+│   │   ├── IWSConversion.cs           contrato SOAP
+│   │   └── ClienteConversion.cs       SINGLETON: ChannelFactory + mensaje del Fault
+│   ├── controlador/
+│   │   └── ControladorConversion.cs   solo pasa las llamadas (asíncronas) y recuerda el usuario
+│   └── vista/
+│       ├── FormLogin.cs               inicio de sesión con la imagen (mensaje del servidor)
+│       ├── FormPrincipal.cs           menú lateral con la imagen + panel
+│       ├── PanelConversion.cs         De / A / valor / historial
+│       ├── CatalogoConversiones.cs    opciones de las listas (+ Unidad)
+│       ├── Formato.cs                 número, imagen
+│       └── Tema.cs                    colores y fuentes
+├── Recursos/monster.jpg               imagen incrustada en el .exe
+└── App.config                         URL del servidor
 ```
 
 Las ventanas están hechas en código, sin archivos `.Designer.cs`, para que se pueda leer cada control y su posición.
 
 ## Funcionalidad
 
-- **Login** contra el servidor: botón "Mostrar clave", aviso de intentos restantes y bloqueo al tercer intento fallido. Mientras espera al servidor, el botón muestra "CONECTANDO...".
+- **Login** contra el servidor: imagen de Monsters Inc. a la izquierda, botón "Mostrar clave" y el mensaje del servidor (intentos restantes o bloqueo de 2 minutos). Mientras espera al servidor, el botón muestra "CONECTANDO...".
 - **Menú lateral** con Temperatura, Longitud y Masa; cada categoría tiene su color.
 - **Pantalla de conversión:**
   - Listas "De" y "A". "A" solo muestra las unidades a las que el servidor sabe convertir desde "De".
@@ -42,7 +45,7 @@ Las ventanas están hechas en código, sin archivos `.Designer.cs`, para que se 
 
 1. Levantar el SERVIDOR.
 2. Abrir `CONUNI_SOAP_DOTNET_CLIESC.sln` y presionar F5.
-3. Usuario `monster`, clave `monster`.
+3. Usuario `monster`, clave `monster69`.
 
 Para cambiar de servidor, editar `address` en `App.config` (o en `bin\Debug\CONUNI_SOAP_DOTNET_CLIESC.exe.config` ya compilado).
 

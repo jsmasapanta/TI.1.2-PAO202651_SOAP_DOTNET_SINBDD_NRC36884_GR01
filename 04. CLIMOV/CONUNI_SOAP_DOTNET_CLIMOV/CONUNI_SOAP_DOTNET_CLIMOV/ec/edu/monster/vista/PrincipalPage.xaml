@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="ConversorUnidades.Movil.Vista.PrincipalPage"
+             x:Class="ec.edu.monster.vista.PrincipalPage"
              NavigationPage.HasNavigationBar="False"
              BackgroundColor="{StaticResource Fondo}">
 
@@ -34,13 +34,13 @@
                         <Label x:Name="LblTitulo" FontSize="22" FontAttributes="Bold" />
 
                         <Label Text="De" FontAttributes="Bold" TextColor="{StaticResource Texto}" />
-                        <Picker x:Name="PkrOrigen" Title="Unidad de origen" SelectedIndexChanged="OnOrigenCambiado" />
+                        <Picker x:Name="PkrOrigen" Title="Unidad de origen" ItemDisplayBinding="{Binding Texto}" SelectedIndexChanged="OnOrigenCambiado" />
 
                         <Button x:Name="BtnIntercambiar" Text="⇅  Intercambiar" Clicked="OnIntercambiarClicked"
                                 HorizontalOptions="Center" FontSize="13" HeightRequest="40" Padding="16,0" />
 
                         <Label Text="A" FontAttributes="Bold" TextColor="{StaticResource Texto}" />
-                        <Picker x:Name="PkrDestino" Title="Unidad de destino" />
+                        <Picker x:Name="PkrDestino" Title="Unidad de destino" ItemDisplayBinding="{Binding Texto}" />
 
                         <Label Text="Valor" FontAttributes="Bold" TextColor="{StaticResource Texto}" Margin="0,4,0,0" />
                         <Entry x:Name="TxtValor" Keyboard="Numeric" Placeholder="Ej.: 36,5" ReturnType="Go"
@@ -71,6 +71,10 @@
                                FontSize="13" TextColor="{StaticResource TextoSuave}" />
                         <VerticalStackLayout x:Name="ListaHistorial" Spacing="4" />
                     </VerticalStackLayout>
+                </Border>
+
+                <Border StrokeThickness="0" StrokeShape="RoundRectangle 14">
+                    <Image Source="monster.jpg" Aspect="AspectFill" HeightRequest="220" />
                 </Border>
 
             </VerticalStackLayout>

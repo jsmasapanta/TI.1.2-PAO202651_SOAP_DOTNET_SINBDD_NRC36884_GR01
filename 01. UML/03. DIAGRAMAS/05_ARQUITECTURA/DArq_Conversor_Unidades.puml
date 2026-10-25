@@ -15,8 +15,8 @@ node "Servidor web cliente\n(Kestrel :5085)" {
   component "CLIWEB\nASP.NET Core MVC .NET 8\n(System.ServiceModel.Http)" as CLIWEB
 }
 
-node "Teléfono / emulador Android" {
-  component "CLIMOV\nKotlin\n(HttpURLConnection + XmlPullParser)" as CLIMOV
+node "Celular / tablet Android" {
+  component "CLIMOV\n.NET MAUI (C#)\n(HttpClient + XDocument)" as CLIMOV
 }
 
 node "Servidor IIS :8085" {
@@ -26,7 +26,7 @@ node "Servidor IIS :8085" {
     component "Servicios\nWSConversion" as SERV
     component "Lógica\nConvertidores · Validación · Autenticador" as LOG
   }
-  file "Web.config\n(credenciales,\nendpoint)" as CFG
+  file "Web.config\n(credenciales monster,\nendpoint)" as CFG
 }
 
 HTML --> CLIWEB : HTTP (formularios)

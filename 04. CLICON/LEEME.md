@@ -6,23 +6,25 @@ Aplicación de consola en .NET Framework 4.7.2 que consume el servicio SOAP `WSC
 
 ```
 CONUNI_SOAP_DOTNET_CLICON/
-├── Modelo/
-│   ├── Conversion.cs            una conversión: categoría, unidades, operación del servicio
-│   └── CatalogoConversiones.cs  las 16 conversiones agrupadas en Temperatura, Longitud y Masa
-├── Servicio/
-│   ├── IWSConversion.cs         copia del contrato del servidor + ErrorServicio
-│   └── ClienteConversion.cs     ChannelFactory; traduce fallas a mensajes claros
-├── Vista/
-│   └── VistaConsola.cs          menús, lectura de datos, clave con asteriscos, resultados
-├── Controlador/
-│   └── ControladorConsola.cs    flujo: login (3 intentos) → categoría → conversión
+├── ec/edu/monster/
+│   ├── modelo/
+│   │   ├── Conversion.cs            Categoria + Conversion (solo get/set)
+│   │   └── ErrorServicio.cs         detalle del SOAP Fault (solo get/set)
+│   ├── servicio/
+│   │   ├── IWSConversion.cs         contrato SOAP (mismo Name y Namespace que el servidor)
+│   │   └── ClienteConversion.cs     SINGLETON: ChannelFactory + mensaje del Fault
+│   ├── controlador/
+│   │   └── ControladorConsola.cs    solo pasa las llamadas y recuerda el usuario
+│   └── vista/
+│       ├── VistaConsola.cs          pantallas: login → categoría → conversión
+│       └── CatalogoConversiones.cs  opciones del menú (16 conversiones)
 ├── Program.cs
-└── App.config                   URL del servidor
+└── App.config                       URL del servidor (endpoint "WSConversion")
 ```
 
 ## Cómo se conecta
 
-No usa "Agregar referencia de servicio". El contrato está copiado en `Servicio/IWSConversion.cs`, con el mismo `Name` y `Namespace` que el servidor, y la conexión se abre con `ChannelFactory`, que toma la URL de `App.config`:
+No usa "Agregar referencia de servicio". El contrato está en `ec/edu/monster/servicio/IWSConversion.cs`, con el mismo `Name` y `Namespace` que el servidor, y la conexión se abre con `ChannelFactory`, que toma la URL de `App.config`:
 
 ```xml
 <endpoint name="WSConversion" address="http://localhost:8085/WSConversion.svc" ... />
@@ -32,7 +34,7 @@ Para conectarse a otra máquina basta cambiar esa dirección; no hay que recompi
 
 ## Funcionalidad
 
-- Login contra el servidor, con la clave oculta con asteriscos y máximo 3 intentos.
+- Login contra el servidor, con la clave oculta con asteriscos. Los 3 intentos y el bloqueo los controla el servidor; la consola muestra su mensaje y pregunta "¿Intentar de nuevo?".
 - Menú de 3 categorías; cada una tiene sus conversiones (temperatura 6, longitud 6, masa 4).
 - Acepta punto o coma decimal (`12.5` o `12,5`).
 - Muestra el resultado con hasta 6 decimales.
@@ -45,4 +47,4 @@ Para conectarse a otra máquina basta cambiar esa dirección; no hay que recompi
 
 1. Levantar el SERVIDOR (F5 en su solución, o IIS).
 2. Abrir `CONUNI_SOAP_DOTNET_CLICON.sln` y presionar F5.
-3. Usuario `monster`, clave `monster`.
+3. Usuario `monster`, clave `monster69`.

@@ -76,7 +76,12 @@ package "Logica" {
     + ValidarNumero(valor)
     + ValidarNoNegativo(valor, magnitud)
   }
-  class Autenticador <<static>> {
+  class Autenticador <<singleton>> {
+    - {static} instancia : Lazy<Autenticador>
+    - usuarioValido : string
+    - claveValida : string
+    + {static} Instancia : Autenticador
+    - Autenticador()
     + Validar(usuario, clave) : bool
   }
 }
@@ -86,7 +91,7 @@ WSConversion ..> ErrorServicio : lanza FaultException<ErrorServicio>
 WSConversion ..> ConvertidorTemperatura
 WSConversion ..> ConvertidorLongitud
 WSConversion ..> ConvertidorMasa
-WSConversion ..> Autenticador
+WSConversion ..> Autenticador : Autenticador.Instancia
 ConvertidorTemperatura ..> Validacion
 ConvertidorLongitud ..> Validacion
 ConvertidorMasa ..> Validacion

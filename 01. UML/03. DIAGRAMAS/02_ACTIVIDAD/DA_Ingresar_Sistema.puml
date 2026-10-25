@@ -1,45 +1,44 @@
 @startuml DA_Ingresar_Sistema
 !include ../_estilo.iuml
-title Diagrama de actividad — CU01 Ingresar al sistema
+title Diagrama de actividad — CU01 Ingresar al sistema (los intentos los controla el servidor)
 
 |Usuario|
 start
-:Abrir el cliente\n(consola, escritorio, web o móvil);
+:Abre el cliente;
+|Cliente (vista + controlador)|
+:Muestra el login y el servidor;
 repeat
-  :Ingresar usuario y clave;
-  |Cliente|
-  if (¿Campos vacíos?) then (sí)
-    :Mostrar "Ingrese usuario y clave";
-    |Usuario|
+  |Usuario|
+  :Escribe usuario y clave;
+  |Cliente (vista + controlador)|
+  :Envía login(usuario, clave);
+  |Servidor WSConversion|
+  if (¿campos vacíos?) then (sí)
+    :Fault «Ingrese usuario y clave.»;
+  elseif (¿usuario bloqueado?) then (sí)
+    :Fault «Usuario bloqueado por superar 3 intentos.\nIntente de nuevo en N segundos.»;
   else (no)
-    |Cliente|
-    :Enviar petición SOAP **login(usuario, clave)**;
-    |Servidor WSConversion|
-    :Autenticador lee usuario y clave\nde Web.config;
-    :Comparar credenciales\n(usuario sin distinguir mayúsculas);
-    :Responder true / false;
-    |Cliente|
-    if (¿Servidor disponible?) then (no)
-      :Mostrar "No se pudo conectar con el servidor";
-      |Usuario|
-    else (sí)
-      |Cliente|
-      if (¿Credenciales válidas?) then (sí)
-        :Guardar usuario en la sesión;
-        :Mostrar menú principal;
-        |Usuario|
-        stop
+    :Compara con UsuarioServicio y ClaveServicio (Web.config);
+    if (¿coinciden?) then (sí)
+      :Reinicia los intentos del usuario;
+      :Devuelve true;
+      |Cliente (vista + controlador)|
+      :Guarda el usuario de la sesión;
+      :Muestra el menú principal;
+      stop
+    else (no)
+      |Servidor WSConversion|
+      :intentos + 1;
+      if (¿intentos = 3?) then (sí)
+        :Bloquea al usuario 2 minutos;
+        :Fault «Se superaron los 3 intentos.\nEl usuario queda bloqueado 2 minutos.»;
       else (no)
-        |Cliente|
-        :Sumar intento fallido;
-        :Mostrar intentos restantes;
+        :Fault «Usuario o clave incorrectos.\nIntentos restantes: N.»;
       endif
     endif
   endif
-  |Cliente|
-repeat while (¿Intentos fallidos < 3?) is (sí)
--> no;
-:Bloquear el acceso;
-|Usuario|
+  |Cliente (vista + controlador)|
+  :Muestra el mensaje del servidor;
+repeat while (¿intenta de nuevo?) is (sí) not (no)
 stop
 @enduml
