@@ -42,6 +42,7 @@ foreach ($c in $caracteristicas) {
 Paso "2/5  Copiando el servidor a $Destino..."
 New-Item -ItemType Directory -Force -Path $Destino, "$Destino\bin" | Out-Null
 Copy-Item (Join-Path $Proyecto 'WSConversion.svc') $Destino -Force
+if (Test-Path (Join-Path $Proyecto 'WSConversion.asmx')) { Copy-Item (Join-Path $Proyecto 'WSConversion.asmx') $Destino -Force }
 Copy-Item (Join-Path $Proyecto 'Web.config') $Destino -Force
 Copy-Item (Join-Path $Proyecto 'bin\*') "$Destino\bin" -Recurse -Force
 

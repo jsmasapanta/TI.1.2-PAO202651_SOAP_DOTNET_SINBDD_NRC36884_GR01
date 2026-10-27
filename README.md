@@ -60,7 +60,7 @@ No usa base de datos: las conversiones se calculan con fórmulas y factores exac
 01. UML/
     01. ERS/        Especificación de requisitos (IEEE 830)
     02. ECUD/       Especificación de casos de uso CU01–CU08
-    03. DIAGRAMAS/  Casos de uso, actividad, secuencia, clases y arquitectura (.puml + .png)
+    03. DIAGRAMAS/  Casos de uso, actividad, secuencia, clases y arquitectura (PowerDesigner .oom/.eam + .png)
 02. MER/            No aplica (sin base de datos)
 03. BDD/            No aplica (sin base de datos)
 04. SERVIDOR/       Servicio WCF (.NET Framework 4.7.2)
@@ -362,7 +362,12 @@ En la PC del servidor, la consola puede quedarse con `localhost`.
 
 - `01. UML/01. ERS` — Especificación de requisitos: 13 requisitos funcionales y 8 no funcionales.
 - `01. UML/02. ECUD` — Especificación de los casos de uso CU01 a CU08.
-- `01. UML/03. DIAGRAMAS` — Diagramas en PlantUML (`.puml`) con su imagen (`.png`).
+- `01. UML/03. DIAGRAMAS` — Diagramas hechos en **SAP PowerDesigner** (`.oom`; arquitectura en `.eam`) con su imagen (`.png`):
+  - `01_CASO_USO`: CU_00_General, CU_01_Ingresar_Sistema, CU_02_Autenticar_Usuario, CU_03_Conversion_Unidades, CU_04_Cerrar_Sesion.
+  - `02_ACTIVIDAD`: ActividadIniciarSesion y ActividadConvertirUnidades (carriles Usuario | Cliente | Servidor).
+  - `03_SECUENCIA`: DS_01 a DS_08 (cliente SOAP Singleton, ingreso, conversiones, cierre de sesión, bloqueo y error de validación).
+  - `04_CLASES`: 01_Diagrama_Clases (dominio) y WS_ConUni_DC (DC_Servidor y DC_Clientes).
+  - `05_ARQUITECTURA`: Arquitectura.eam.
 - `05. DOCUMENTACIÓN/WS_CONUNI_SOAP_DOTNET_*.docx` — Manual técnico.
 - `05. DOCUMENTACIÓN/MANUAL_SOAP_DOTNET_*.pptx` — Presentación.
 - `05. DOCUMENTACIÓN/capturas` — Capturas de cada cliente.

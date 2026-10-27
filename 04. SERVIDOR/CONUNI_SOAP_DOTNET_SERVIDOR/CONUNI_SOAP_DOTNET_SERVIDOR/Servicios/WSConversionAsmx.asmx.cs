@@ -13,7 +13,7 @@ namespace ConversorUnidades.Servidor.Servicios
     /// y permite probarlas con un formulario. Usa la misma lógica (Autenticador y Convertidor*).
     /// </summary>
     [WebService(Name = "WSConversion", Namespace = Constantes.NamespaceServicio,
-        Description = "Conversor de unidades · SOAP .NET sin base de datos. Usuario de prueba: monster / monster69. Temperatura, longitud y masa.")]
+        Description = "Conversor de unidades · SOAP .NET sin base de datos. Temperatura, longitud y masa.")]
     [WebServiceBinding(ConformsTo = WsiProfiles.BasicProfile1_1)]
     public class WSConversionAsmx : WebService
     {
