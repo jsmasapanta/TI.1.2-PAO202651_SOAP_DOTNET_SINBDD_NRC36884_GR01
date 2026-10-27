@@ -1187,7 +1187,7 @@ Script=.convert_code(%Code%,&quot; &quot;)
 ConvTable=
 ConvTablePath=%_HOME%\Resource Files\Conversion Tables</a:ModelOptionsText>
 <a:GlobalObjectID/>
-<a:RepositoryFilename>D:\Documentos nuevos\ESPE\cloude - arquitectura\TI.1.2. PAO202650_SOAP_DOTNET_SINBDD_NRC36884_GR01\01. UML\03. DIAGRAMAS\05_ARQUITECTURA\Arquitectura.eam</a:RepositoryFilename>
+<a:RepositoryFilename>D:\Documentos nuevos\ESPE\cloude - arquitectura\TI.1.2 PAO202651_SOAP_DOTNET_SINBDD_NRC36884_GR01\01. UML\03. DIAGRAMAS\05_ARQUITECTURA\Arquitectura.eam</a:RepositoryFilename>
 <c:ExtendedModelDefinitions>
 <o:Shortcut Id="o3">
 <a:ObjectID>EF9BF3F1-EFDE-4B16-8E29-D730C2013B5E</a:ObjectID>
