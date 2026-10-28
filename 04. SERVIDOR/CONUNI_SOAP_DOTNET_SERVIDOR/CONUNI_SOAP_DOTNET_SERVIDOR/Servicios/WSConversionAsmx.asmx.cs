@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 using System.Web.Services;
 using System.Web.Services.Protocols;
 using System.Xml;
@@ -18,52 +19,52 @@ namespace ConversorUnidades.Servidor.Servicios
     public class WSConversionAsmx : WebService
     {
         [WebMethod(Description = "Devuelve true si usuario y clave son correctos; si no, responde un error con los intentos restantes (bloqueo de 2 minutos al tercero).")]
-        public bool Login(string usuario, string clave) => Ejecutar(() => Autenticador.Instancia.Validar(usuario, clave));
+        public bool Login(string usuario, string clave) => Ejecutar(() => Autenticador.Instancia.Validar(usuario, clave), usuario);
 
         // ---------- Temperatura ----------
         [WebMethod(Description = "°C → °F (no menor a -273.15 °C).")]
-        public double CelsiusAFahrenheit(double valor) => Ejecutar(() => ConvertidorTemperatura.CelsiusAFahrenheit(valor));
+        public double CelsiusAFahrenheit(double valor) => Ejecutar(() => ConvertidorTemperatura.CelsiusAFahrenheit(valor), valor);
         [WebMethod(Description = "°F → °C (no menor a -459.67 °F).")]
-        public double FahrenheitACelsius(double valor) => Ejecutar(() => ConvertidorTemperatura.FahrenheitACelsius(valor));
+        public double FahrenheitACelsius(double valor) => Ejecutar(() => ConvertidorTemperatura.FahrenheitACelsius(valor), valor);
         [WebMethod(Description = "°C → K.")]
-        public double CelsiusAKelvin(double valor) => Ejecutar(() => ConvertidorTemperatura.CelsiusAKelvin(valor));
+        public double CelsiusAKelvin(double valor) => Ejecutar(() => ConvertidorTemperatura.CelsiusAKelvin(valor), valor);
         [WebMethod(Description = "K → °C (no menor a 0 K).")]
-        public double KelvinACelsius(double valor) => Ejecutar(() => ConvertidorTemperatura.KelvinACelsius(valor));
+        public double KelvinACelsius(double valor) => Ejecutar(() => ConvertidorTemperatura.KelvinACelsius(valor), valor);
         [WebMethod(Description = "°F → K.")]
-        public double FahrenheitAKelvin(double valor) => Ejecutar(() => ConvertidorTemperatura.FahrenheitAKelvin(valor));
+        public double FahrenheitAKelvin(double valor) => Ejecutar(() => ConvertidorTemperatura.FahrenheitAKelvin(valor), valor);
         [WebMethod(Description = "K → °F.")]
-        public double KelvinAFahrenheit(double valor) => Ejecutar(() => ConvertidorTemperatura.KelvinAFahrenheit(valor));
+        public double KelvinAFahrenheit(double valor) => Ejecutar(() => ConvertidorTemperatura.KelvinAFahrenheit(valor), valor);
 
         // ---------- Longitud ----------
         [WebMethod(Description = "m → ft (no negativo).")]
-        public double MetrosAPies(double valor) => Ejecutar(() => ConvertidorLongitud.MetrosAPies(valor));
+        public double MetrosAPies(double valor) => Ejecutar(() => ConvertidorLongitud.MetrosAPies(valor), valor);
         [WebMethod(Description = "ft → m (no negativo).")]
-        public double PiesAMetros(double valor) => Ejecutar(() => ConvertidorLongitud.PiesAMetros(valor));
+        public double PiesAMetros(double valor) => Ejecutar(() => ConvertidorLongitud.PiesAMetros(valor), valor);
         [WebMethod(Description = "m → in (no negativo).")]
-        public double MetrosAPulgadas(double valor) => Ejecutar(() => ConvertidorLongitud.MetrosAPulgadas(valor));
+        public double MetrosAPulgadas(double valor) => Ejecutar(() => ConvertidorLongitud.MetrosAPulgadas(valor), valor);
         [WebMethod(Description = "in → m (no negativo).")]
-        public double PulgadasAMetros(double valor) => Ejecutar(() => ConvertidorLongitud.PulgadasAMetros(valor));
+        public double PulgadasAMetros(double valor) => Ejecutar(() => ConvertidorLongitud.PulgadasAMetros(valor), valor);
         [WebMethod(Description = "km → mi (no negativo).")]
-        public double KilometrosAMillas(double valor) => Ejecutar(() => ConvertidorLongitud.KilometrosAMillas(valor));
+        public double KilometrosAMillas(double valor) => Ejecutar(() => ConvertidorLongitud.KilometrosAMillas(valor), valor);
         [WebMethod(Description = "mi → km (no negativo).")]
-        public double MillasAKilometros(double valor) => Ejecutar(() => ConvertidorLongitud.MillasAKilometros(valor));
+        public double MillasAKilometros(double valor) => Ejecutar(() => ConvertidorLongitud.MillasAKilometros(valor), valor);
 
         // ---------- Masa ----------
         [WebMethod(Description = "kg → lb (no negativo).")]
-        public double KilogramosALibras(double valor) => Ejecutar(() => ConvertidorMasa.KilogramosALibras(valor));
+        public double KilogramosALibras(double valor) => Ejecutar(() => ConvertidorMasa.KilogramosALibras(valor), valor);
         [WebMethod(Description = "lb → kg (no negativo).")]
-        public double LibrasAKilogramos(double valor) => Ejecutar(() => ConvertidorMasa.LibrasAKilogramos(valor));
+        public double LibrasAKilogramos(double valor) => Ejecutar(() => ConvertidorMasa.LibrasAKilogramos(valor), valor);
         [WebMethod(Description = "g → oz (no negativo).")]
-        public double GramosAOnzas(double valor) => Ejecutar(() => ConvertidorMasa.GramosAOnzas(valor));
+        public double GramosAOnzas(double valor) => Ejecutar(() => ConvertidorMasa.GramosAOnzas(valor), valor);
         [WebMethod(Description = "oz → g (no negativo).")]
-        public double OnzasAGramos(double valor) => Ejecutar(() => ConvertidorMasa.OnzasAGramos(valor));
+        public double OnzasAGramos(double valor) => Ejecutar(() => ConvertidorMasa.OnzasAGramos(valor), valor);
 
         // Mismos códigos de error que WSConversion.svc: el detalle del Fault lleva <ErrorServicio><Codigo/><Mensaje/>.
-        private T Ejecutar<T>(Func<T> operacion)
+        private T Ejecutar<T>(Func<T> operacion, object entrada, [CallerMemberName] string nombre = "")
         {
             try
             {
-                return operacion();
+                return Consumo.Medir("ASMX", nombre, entrada, operacion);
             }
             catch (ArgumentException ex)
             {

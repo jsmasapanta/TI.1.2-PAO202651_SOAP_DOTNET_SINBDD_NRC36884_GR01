@@ -1,5 +1,8 @@
 using System;
 using System.ServiceModel;
+using System.ServiceModel.Channels;
+using System.ServiceModel.Description;
+using System.ServiceModel.Dispatcher;
 using ec.edu.monster.modelo;
 
 namespace ec.edu.monster.servicio
@@ -31,6 +34,7 @@ namespace ec.edu.monster.servicio
         private ClienteConversion()
         {
             _fabrica = new ChannelFactory<IWSConversion>(NombreEndpoint);
+            _fabrica.Endpoint.EndpointBehaviors.Add(new CabeceraCliente("Consola"));
         }
 
         public string UrlServidor => _fabrica.Endpoint.Address.Uri.ToString();
@@ -112,5 +116,33 @@ namespace ec.edu.monster.servicio
                 throw new ErrorServicioException("Error de comunicación con el servidor: " + ex.Message);
             }
         }
+    }
+
+    /// <summary>
+    /// Agrega la cabecera HTTP "X-Cliente" a cada llamada para que el panel de monitoreo del servidor
+    /// sepa qué cliente consume el servicio.
+    /// </summary>
+    internal sealed class CabeceraCliente : IEndpointBehavior, IClientMessageInspector
+    {
+        private readonly string _nombre;
+
+        public CabeceraCliente(string nombre) { _nombre = nombre; }
+
+        public object BeforeSendRequest(ref Message request, IClientChannel channel)
+        {
+            if (!request.Properties.TryGetValue(HttpRequestMessageProperty.Name, out object propiedad))
+            {
+                propiedad = new HttpRequestMessageProperty();
+                request.Properties.Add(HttpRequestMessageProperty.Name, propiedad);
+            }
+            ((HttpRequestMessageProperty)propiedad).Headers["X-Cliente"] = _nombre;
+            return null;
+        }
+
+        public void AfterReceiveReply(ref Message reply, object correlationState) { }
+        public void ApplyClientBehavior(ServiceEndpoint endpoint, ClientRuntime clientRuntime) => clientRuntime.ClientMessageInspectors.Add(this);
+        public void AddBindingParameters(ServiceEndpoint endpoint, BindingParameterCollection bindingParameters) { }
+        public void ApplyDispatchBehavior(ServiceEndpoint endpoint, EndpointDispatcher endpointDispatcher) { }
+        public void Validate(ServiceEndpoint endpoint) { }
     }
 }

@@ -1,5 +1,9 @@
 using System;
+using System.IO;
 using System.ServiceModel;
+using System.ServiceModel.Channels;
+using System.ServiceModel.Description;
+using System.ServiceModel.Dispatcher;
 using ec.edu.monster.modelo;
 
 namespace ec.edu.monster.servicio
@@ -25,12 +29,65 @@ namespace ec.edu.monster.servicio
 
         public static ClienteConversion Instancia => _instancia.Value;
 
-        private readonly ChannelFactory<IWSConversion> _fabrica;
+        // Archivo donde se recuerda el último servidor escrito en la ventana de ingreso.
+        private static readonly string ArchivoServidor = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "CONUNI_CLIESC", "servidor.txt");
+
+        private ChannelFactory<IWSConversion> _fabrica;
 
         // Constructor privado: solo la propia clase crea la instancia.
         private ClienteConversion()
         {
-            _fabrica = new ChannelFactory<IWSConversion>(NombreEndpoint);
+            _fabrica = CrearFabrica(null);
+
+            // Si ya se usó otro servidor, se arranca con ese; si no, con el de App.config.
+            string guardado = File.Exists(ArchivoServidor) ? File.ReadAllText(ArchivoServidor).Trim() : null;
+            if (!string.IsNullOrEmpty(guardado))
+            {
+                try { _fabrica = CrearFabrica(new EndpointAddress(guardado)); }
+                catch (UriFormatException) { }
+            }
+        }
+
+        private static ChannelFactory<IWSConversion> CrearFabrica(EndpointAddress direccion)
+        {
+            var fabrica = direccion == null
+                ? new ChannelFactory<IWSConversion>(NombreEndpoint)
+                : new ChannelFactory<IWSConversion>(NombreEndpoint, direccion);
+            fabrica.Endpoint.EndpointBehaviors.Add(new CabeceraCliente("Escritorio"));
+            return fabrica;
+        }
+
+        /// <summary>
+        /// Cambia el servidor al que se llama y lo recuerda para la próxima vez. Acepta la URL completa,
+        /// "IP:puerto" o solo la IP (completa con el puerto 8085 y /WSConversion.svc).
+        /// </summary>
+        public void CambiarServidor(string texto)
+        {
+            string url = NormalizarUrl(texto);
+            if (url == UrlServidor) return;
+
+            ChannelFactory<IWSConversion> anterior = _fabrica;
+            _fabrica = CrearFabrica(new EndpointAddress(url));
+            try { anterior.Close(); } catch { anterior.Abort(); }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(ArchivoServidor));
+            File.WriteAllText(ArchivoServidor, url);
+        }
+
+        private static string NormalizarUrl(string texto)
+        {
+            string url = (texto ?? "").Trim();
+            if (url.Length == 0) throw new ErrorServicioException("Ingrese la dirección del servidor SOAP.");
+            if (!url.Contains("://")) url = "http://" + url;
+
+            if (!Uri.TryCreate(url, UriKind.Absolute, out Uri uri) || uri.Scheme != Uri.UriSchemeHttp)
+                throw new ErrorServicioException("Dirección de servidor no válida. Ejemplo: http://192.168.1.10:8085/WSConversion.svc");
+
+            var constructor = new UriBuilder(uri);
+            if (uri.IsDefaultPort && !texto.Contains(":80")) constructor.Port = 8085;
+            if (constructor.Path == "/") constructor.Path = "/WSConversion.svc";
+            return constructor.Uri.ToString();
         }
 
         public string UrlServidor => _fabrica.Endpoint.Address.Uri.ToString();
@@ -99,7 +156,7 @@ namespace ec.edu.monster.servicio
             {
                 comunicacion.Abort();
                 throw new ErrorServicioException(
-                    "No se pudo conectar con el servidor en " + UrlServidor + ". Verifique que esté encendido y la URL en App.config.");
+                    "No se pudo conectar con el servidor en " + UrlServidor + ". Verifique que esté encendido y la dirección del servidor.");
             }
             catch (TimeoutException)
             {
@@ -112,5 +169,33 @@ namespace ec.edu.monster.servicio
                 throw new ErrorServicioException("Error de comunicación con el servidor: " + ex.Message);
             }
         }
+    }
+
+    /// <summary>
+    /// Agrega la cabecera HTTP "X-Cliente" a cada llamada para que el panel de monitoreo del servidor
+    /// sepa qué cliente consume el servicio.
+    /// </summary>
+    internal sealed class CabeceraCliente : IEndpointBehavior, IClientMessageInspector
+    {
+        private readonly string _nombre;
+
+        public CabeceraCliente(string nombre) { _nombre = nombre; }
+
+        public object BeforeSendRequest(ref Message request, IClientChannel channel)
+        {
+            if (!request.Properties.TryGetValue(HttpRequestMessageProperty.Name, out object propiedad))
+            {
+                propiedad = new HttpRequestMessageProperty();
+                request.Properties.Add(HttpRequestMessageProperty.Name, propiedad);
+            }
+            ((HttpRequestMessageProperty)propiedad).Headers["X-Cliente"] = _nombre;
+            return null;
+        }
+
+        public void AfterReceiveReply(ref Message reply, object correlationState) { }
+        public void ApplyClientBehavior(ServiceEndpoint endpoint, ClientRuntime clientRuntime) => clientRuntime.ClientMessageInspectors.Add(this);
+        public void AddBindingParameters(ServiceEndpoint endpoint, BindingParameterCollection bindingParameters) { }
+        public void ApplyDispatchBehavior(ServiceEndpoint endpoint, EndpointDispatcher endpointDispatcher) { }
+        public void Validate(ServiceEndpoint endpoint) { }
     }
 }

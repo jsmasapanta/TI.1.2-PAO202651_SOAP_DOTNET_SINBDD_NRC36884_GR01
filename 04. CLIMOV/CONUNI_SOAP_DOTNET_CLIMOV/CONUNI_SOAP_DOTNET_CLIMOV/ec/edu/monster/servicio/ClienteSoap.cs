@@ -78,6 +78,8 @@ public sealed class ClienteSoap
             Content = new StringContent(ConstruirSobre(operacion, parametros), Encoding.UTF8, "text/xml")
         };
         peticion.Headers.Add("SOAPAction", $"\"{Namespace}{Contrato}/{operacion}\"");
+        // Para que el panel de monitoreo del servidor sepa que la llamada viene del móvil.
+        peticion.Headers.Add("X-Cliente", "Movil");
 
         try
         {

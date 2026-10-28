@@ -43,6 +43,7 @@ Paso "2/5  Copiando el servidor a $Destino..."
 New-Item -ItemType Directory -Force -Path $Destino, "$Destino\bin" | Out-Null
 Copy-Item (Join-Path $Proyecto 'WSConversion.svc') $Destino -Force
 if (Test-Path (Join-Path $Proyecto 'WSConversion.asmx')) { Copy-Item (Join-Path $Proyecto 'WSConversion.asmx') $Destino -Force }
+if (Test-Path (Join-Path $Proyecto 'Monitor.ashx')) { Copy-Item (Join-Path $Proyecto 'Monitor.ashx') $Destino -Force }
 Copy-Item (Join-Path $Proyecto 'Web.config') $Destino -Force
 Copy-Item (Join-Path $Proyecto 'bin\*') "$Destino\bin" -Recurse -Force
 
@@ -77,3 +78,4 @@ try {
 
 Write-Host "`nListo. Los demás integrantes usan una de estas URL (la del adaptador Wi-Fi):" -ForegroundColor Green
 foreach ($ip in $ips) { Write-Host ("   {0,-12} http://{1}:{2}/WSConversion.svc" -f $ip.InterfaceAlias, $ip.IPAddress, $Puerto) }
+Write-Host "`nMonitor de consumo: http://localhost:$Puerto/Monitor.ashx" -ForegroundColor Green

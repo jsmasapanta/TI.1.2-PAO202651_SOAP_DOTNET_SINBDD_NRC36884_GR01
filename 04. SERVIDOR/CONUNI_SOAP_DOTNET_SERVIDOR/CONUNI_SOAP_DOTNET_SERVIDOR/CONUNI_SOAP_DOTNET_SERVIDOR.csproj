@@ -54,6 +54,7 @@
   <ItemGroup>
     <Content Include="WSConversion.svc" />
     <Content Include="WSConversion.asmx" />
+    <Content Include="Monitor.ashx" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
@@ -61,12 +62,15 @@
     <Compile Include="Contratos\ErrorServicio.cs" />
     <Compile Include="Contratos\IWSConversion.cs" />
     <Compile Include="Logica\Autenticador.cs" />
+    <Compile Include="Logica\MonitorServicio.cs" />
     <Compile Include="Logica\ConvertidorLongitud.cs" />
     <Compile Include="Logica\ConvertidorMasa.cs" />
     <Compile Include="Logica\ConvertidorTemperatura.cs" />
     <Compile Include="Logica\ReglaNegocioException.cs" />
     <Compile Include="Logica\Validacion.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Servicios\Consumo.cs" />
+    <Compile Include="Servicios\MonitorHandler.cs" />
     <Compile Include="Servicios\WSConversion.svc.cs">
       <DependentUpon>WSConversion.svc</DependentUpon>
     </Compile>
