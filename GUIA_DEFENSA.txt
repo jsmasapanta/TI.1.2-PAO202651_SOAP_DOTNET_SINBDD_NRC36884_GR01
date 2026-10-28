@@ -1,0 +1,221 @@
+==========================================================================
+ TI.1.2  CONVERSOR DE UNIDADES - SOAP .NET SIN BDD  (Grupo 1 - NRC 36884)
+ GUIA PARA CORRER TODO Y DEFENDER EL PROYECTO
+==========================================================================
+
+ Usuario: monster        Clave: monster69
+ Servidor SOAP:  http://IP-DEL-SERVIDOR:8085/WSConversion.svc
+ Pagina ASMX:    http://IP-DEL-SERVIDOR:8085/WSConversion.asmx
+ WSDL:           http://IP-DEL-SERVIDOR:8085/WSConversion.svc?wsdl
+ Cliente web:    http://localhost:5085
+
+ Roles:
+   Integrante 1 -> Servidor + Consola   (su PC)
+   Integrante 2 -> Web + Escritorio     (su PC)
+   Integrante 3 -> Movil                (celular real)
+
+ REGLA: todos conectados a la MISMA red WiFi.
+ REGLA: cada solucion se abre en su PROPIA ventana de Visual Studio.
+
+
+--------------------------------------------------------------------------
+ ANTES DE LA CLASE (en casa)
+--------------------------------------------------------------------------
+ [ ] Cada uno tiene la carpeta del proyecto (git clone o copia):
+     https://github.com/jsmasapanta/TI.1.2-PAO202651_SOAP_DOTNET_SINBDD_NRC36884_GR01
+ [ ] Integrante 2: abrir web y escritorio una vez en Visual Studio y
+     compilar (Compilar -> Compilar solucion) para que baje los NuGet.
+ [ ] Integrante 3: instalar la app en SU celular (paso 4) y dejarla
+     instalada. Llevar el cable de datos por si acaso.
+ [ ] Laptops cargadas y con el cargador.
+
+
+--------------------------------------------------------------------------
+ PASO 1 - SERVIDOR EN IIS  (Integrante 1)
+--------------------------------------------------------------------------
+ 1. Conectarse a la WiFi de la clase.
+ 2. Abrir 04. SERVIDOR\CONUNI_SOAP_DOTNET_SERVIDOR\CONUNI_SOAP_DOTNET_SERVIDOR.sln
+    -> Compilar -> Compilar solucion -> cerrar ese Visual Studio.
+    (Si junto al reloj esta el icono de IIS Express: clic derecho -> Salir)
+ 3. Clic derecho en Inicio -> Terminal (Administrador) -> Si.
+ 4. Ejecutar (cambiar RUTA por la ruta real de la carpeta del proyecto):
+
+    powershell -ExecutionPolicy Bypass -File "RUTA\04. SERVIDOR\publicar_iis.ps1"
+
+ 5. Al final debe decir:  WSDL OK (HTTP 200)
+    y mostrar la URL del adaptador Wi-Fi, por ejemplo:
+       Wi-Fi   http://192.168.0.106:8085/WSConversion.svc
+    ==> ESA IP SE LA PASA A LOS DEMAS.
+    (Si no la muestra: comando  ipconfig  -> "Direccion IPv4" del Wi-Fi)
+ 6. Probar en el navegador: http://IP:8085/WSConversion.svc
+    Debe salir "Servicio de WSConversion".
+
+ Si la IP cambia (otra WiFi), volver a ejecutar el script.
+
+
+--------------------------------------------------------------------------
+ PASO 2 - PROBAR LA RED  (Integrantes 2 y 3)
+--------------------------------------------------------------------------
+ En el navegador de la laptop y del celular abrir:
+    http://IP-DEL-SERVIDOR:8085/WSConversion.svc
+ Si sale "Servicio de WSConversion" -> todo bien.
+ Si NO sale -> revisar que esten en la misma WiFi y que el script del
+ integrante 1 haya terminado sin errores. (Algunas redes de la ESPE
+ bloquean equipos entre si: en ese caso usar el hotspot de un celular.)
+
+
+--------------------------------------------------------------------------
+ PASO 3 - CLIENTES DE PC
+--------------------------------------------------------------------------
+ CONSOLA (Integrante 1, en la misma PC del servidor)
+   - Abrir 04. CLICON\...\CONUNI_SOAP_DOTNET_CLICON.sln
+   - En App.config puede quedar  http://localhost:8085/WSConversion.svc
+   - Depurar -> Iniciar sin depurar (Ctrl+F5)
+   - Ingresar monster / monster69 -> [1] Temperatura, [2] Longitud,
+     [3] Masa -> elegir conversion -> escribir valor. [0] vuelve/sale.
+
+ ESCRITORIO (Integrante 2)
+   - Abrir 04. CLIESC\...\CONUNI_SOAP_DOTNET_CLIESC.sln
+   - App.config -> address="http://IP-DEL-SERVIDOR:8085/WSConversion.svc"
+   - Ctrl+F5 -> monster / monster69 -> elegir categoria, De, A, valor,
+     CONVERTIR. Abajo dice a que servidor esta conectado.
+
+ WEB (Integrante 2)
+   - Abrir 04. CLIWEB\...\CONUNI_SOAP_DOTNET_CLIWEB.sln
+   - appsettings.json -> "ServicioSoap": { "Url": "http://IP-DEL-SERVIDOR:8085/WSConversion.svc" }
+   - En el boton verde debe decir CONUNI_SOAP_DOTNET_CLIWEB
+   - Ctrl+F5 -> NO cerrar la ventana negra -> navegador en http://localhost:5085
+   - Si pide certificado SSL -> responder No.
+
+
+--------------------------------------------------------------------------
+ PASO 4 - MOVIL EN CELULAR REAL  (Integrante 3)
+--------------------------------------------------------------------------
+ Instalar (una sola vez, mejor en casa):
+   1. Celular: Ajustes -> Acerca del telefono -> Informacion de software
+      -> tocar 7 veces "Numero de compilacion".
+   2. Ajustes -> Opciones de desarrollador -> activar Depuracion USB.
+   3. Conectar por cable de datos -> en el celular "Permitir".
+   4. Abrir 04. CLIMOV\...\CONUNI_SOAP_DOTNET_CLIMOV.sln
+      -> flecha del boton verde -> Dispositivos Android locales -> el celular
+      -> Depurar -> Iniciar sin depurar (la primera vez tarda).
+ En la presentacion:
+   5. Abrir la app "Monsters Inc. Converter".
+   6. En el cuadro "Servidor SOAP" (debajo de INGRESAR) escribir:
+         http://IP-DEL-SERVIDOR:8085/WSConversion.svc
+   7. Ingresar monster / monster69 y convertir. (La app recuerda la URL.)
+
+
+--------------------------------------------------------------------------
+ PASO 5 - DEMOSTRACION (orden recomendado, unos 5 minutos)
+--------------------------------------------------------------------------
+ 1. Mostrar en el navegador el .svc, el ?wsdl y el .asmx (servidor arriba).
+ 2. Login con error en cualquier cliente: monster / otra
+    -> "Usuario o clave incorrectos. Intentos restantes: 2."  (lo cuenta el SERVIDOR)
+ 3. Login correcto en los 4 clientes a la vez y convertir:
+      PC 1  Consola     100 C -> F      = 212 F
+      PC 2  Escritorio  1 m -> ft       = 3.28084 ft
+      PC 2  Web         10 km -> mi     = 6.213712 mi
+      Cel   Movil       1 kg -> lb      = 2.204623 lb
+ 4. Error de validacion: -300 C -> F
+    -> SOAP Fault "La temperatura no puede ser menor al cero absoluto"
+    (sale en rojo en todos los clientes)
+ 5. Valor no numerico "abc" -> "Ingrese un numero valido" (no llama al servidor)
+ 6. Boton intercambiar (⇄), historial de la sesion y cerrar sesion.
+ 7. (Opcional) 3 intentos fallidos -> usuario bloqueado 2 minutos.
+    OJO: luego hay que esperar 2 minutos para volver a entrar.
+
+ Otros valores de prueba:
+   25 C -> K = 298.15 K      1 mi -> km = 1.609344 km
+   100 g -> oz = 3.527396    36,5 C -> F = 97.7 F (acepta coma)
+
+
+--------------------------------------------------------------------------
+ PREGUNTAS PROBABLES DEL INGENIERO
+--------------------------------------------------------------------------
+ * Que es SOAP?
+   Protocolo de mensajes XML sobre HTTP. Cada llamada es un "sobre"
+   (Envelope) con Header y Body. El contrato se publica en el WSDL.
+   Usamos SOAP 1.1 con basicHttpBinding (WCF).
+
+ * Diferencia .svc y .asmx?
+   .svc es WCF (tecnologia moderna de Microsoft para servicios).
+   .asmx es el servicio web clasico de ASP.NET. Publicamos los dos con
+   las mismas operaciones; el .asmx trae formulario de prueba.
+
+ * Arquitectura?
+   Cliente-servidor orientada a servicios (SOA). 1 servidor WCF en IIS
+   (puerto 8085) y 4 clientes: consola, escritorio, web y movil.
+   El servidor tiene capas: Contratos (IWSConversion), Servicios
+   (WSConversion) y Logica (Convertidores, Validacion, Autenticador).
+
+ * Donde esta MVC?
+   En los clientes, dentro de ec/edu/monster/:
+     modelo/      -> solo datos con get/set (Conversion, ErrorServicio)
+     vista/       -> pantallas (consola, formularios, .cshtml, .xaml)
+     controlador/ -> recibe la accion de la vista y llama al servicio
+     servicio/    -> cliente SOAP que habla con el servidor
+
+ * Donde esta el Singleton?
+   Una sola instancia, constructor privado, acceso por "Instancia",
+   creado con Lazy<T> (seguro entre hilos).
+     Servidor:   Autenticador.Instancia (lee Web.config una vez y guarda
+                 los intentos fallidos de cada usuario)
+     Consola y escritorio: ClienteConversion.Instancia (una sola ChannelFactory)
+     Web:        AddSingleton<ClienteConversion>() en Program.cs
+     Movil:      ClienteSoap.Instancia y ControladorConversion.Instancia
+   Por que: no crear una conexion nueva en cada conversion y que el
+   contador de intentos sea unico para todo el servidor.
+
+ * Donde se valida?
+   En el SERVIDOR: credenciales, 3 intentos y bloqueo de 2 minutos,
+   cero absoluto (-273.15 C / -459.67 F / 0 K), longitud y masa no
+   negativas. El cliente solo revisa que sea numero.
+   Si algo es invalido el servidor responde un SOAP Fault
+   (FaultException<ErrorServicio> con Codigo y Mensaje):
+   VALOR_INVALIDO, REGLA_NEGOCIO o ERROR_SERVIDOR.
+
+ * Donde estan usuario y clave? Por que no hay base de datos?
+   En el Web.config del servidor (UsuarioServicio / ClaveServicio).
+   Este proyecto es SIN BDD; las conversiones son formulas, no se guarda
+   nada. El historial vive solo durante la sesion.
+
+ * Cuantas operaciones tiene?
+   17: login + 6 de temperatura + 6 de longitud + 4 de masa.
+   Factores exactos: 1 ft = 0.3048 m, 1 in = 0.0254 m,
+   1 mi = 1.609344 km, 1 lb = 0.45359237 kg, 1 oz = 28.349523125 g.
+
+ * Por que IIS y no IIS Express?
+   IIS Express solo acepta conexiones de la misma PC; para que los otros
+   equipos se conecten por IP se publica en IIS (sitio CONUNI, puerto
+   8085, regla de firewall "CONUNI SOAP 8085").
+
+ * Por que .NET MAUI y no Xamarin?
+   MAUI es el sucesor oficial de Xamarin.Forms (Xamarin perdio soporte
+   en mayo de 2024). Mismo C# y XAML. El movil llama al SOAP armando el
+   sobre XML con HttpClient.
+
+ * Diagramas?
+   Todos en SAP PowerDesigner (01. UML\03. DIAGRAMAS): casos de uso,
+   actividad (carriles Usuario | Cliente | Servidor), secuencia DS_01 a
+   DS_08, clases (servidor y clientes) y arquitectura (.eam).
+   Documentos: ERS (IEEE 830), ECUD (CU01 a CU08), manual tecnico y PPT.
+
+
+--------------------------------------------------------------------------
+ SI ALGO FALLA
+--------------------------------------------------------------------------
+ "No se pudo conectar con el servidor"  -> IP mal escrita o servidor
+     apagado. Probar el .svc en el navegador (Paso 2).
+ Movil "el servidor tardo demasiado"     -> la app tiene otra URL; escribir
+     la IP del servidor en el cuadro "Servidor SOAP".
+ Web o movil "(Descargado)" en VS        -> falta C:\Program Files\dotnet\
+     en la variable Path; agregarla y reiniciar Visual Studio.
+ Error 500 "puertas de memoria"          -> cerrar programas (ya esta
+     corregido en Web.config).
+ Ctrl+F5 no hace nada                    -> Depurar -> Iniciar sin depurar
+     o Ctrl+Fn+F5.
+ Usuario bloqueado                       -> esperar 2 minutos.
+ La red de la clase no deja conectar     -> hotspot de un celular y todos
+     conectados ahi; volver a correr publicar_iis.ps1 para la nueva IP.
+==========================================================================
